@@ -1,67 +1,75 @@
-// src/components/NoteInProgress.tsx
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const NotesInProgress: React.FC = () => {
-  const [selectedNotes, setSelectedNotes] = useState<number[]>([]);
+  const [notes, setNotes] = useState([]);
+  const [selectedNote, setSelectedNote] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [updatedNote, setUpdatedNote] = useState({ nombre: '', fecha: '', contenido: '' });
 
-  const handleCheckboxChange = (noteId: number) => {
-    setSelectedNotes(prev =>
-      prev.includes(noteId) ? prev.filter(id => id !== noteId) : [...prev, noteId]
-    );
+  useEffect(() => {
+    const fetchNotes = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/notes/inprocess', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setNotes(response.data);
+      } catch (error) {
+        console.error('Error al obtener las notas en proceso:', error);
+      }
+    };
+
+    fetchNotes();
+  }, []);
+
+  const handleEdit = (note) => {
+    setSelectedNote(note);
+    setUpdatedNote(note);
+    setModalVisible(true);
   };
 
-  const handleEdit = () => {
-    // Lógica para editar las notas seleccionadas
-    console.log('Editando notas:', selectedNotes);
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3000/api/notes/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      setNotes(notes.filter(note => note.id_nota !== id));
+    } catch (error) {
+      console.error('Error al eliminar la nota:', error);
+    }
   };
 
-  const handleDelete = () => {
-    // Lógica para eliminar las notas seleccionadas
-    console.log('Eliminando notas:', selectedNotes);
+  const handleSave = async () => {
+    try {
+      await axios.put(`http://localhost:3000/api/notes/${selectedNote.id_nota}`, updatedNote, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      setNotes(notes.map(note => (note.id_nota === selectedNote.id_nota ? updatedNote : note)));
+      setModalVisible(false);
+    } catch (error) {
+      console.error('Error al actualizar la nota:', error);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setUpdatedNote({
+      ...updatedNote,
+      [name]: value,
+    });
   };
 
   return (
     <div className="bg-white p-8 rounded-md w-full">
       <div className="flex items-center justify-between pb-6">
         <div>
-          <h2 className="text-gray-600 font-semibold">Listado de Notas</h2>
-          <span className="text-xs">Notas terminadas</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex bg-gray-50 items-center p-2 rounded-md">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-gray-400"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <input
-              className="bg-gray-50 outline-none ml-1 block"
-              type="text"
-              placeholder="search..."
-            />
-          </div>
-          <div className="lg:ml-40 ml-10 space-x-8">
-            <button
-              onClick={handleEdit}
-              className="bg-indigo-600 px-4 py-2 rounded-md text-white font-semibold tracking-wide cursor-pointer"
-            >
-              Editar
-            </button>
-            <button
-              onClick={handleDelete}
-              className="bg-indigo-600 px-4 py-2 rounded-md text-white font-semibold tracking-wide cursor-pointer"
-            >
-              Eliminar
-            </button>
-          </div>
+          <h2 className="text-gray-600 font-semibold">Listado de Notas en Proceso</h2>
         </div>
       </div>
       <div>
@@ -71,7 +79,7 @@ const NotesInProgress: React.FC = () => {
               <thead>
                 <tr>
                   <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Seleccionar
+                    ID
                   </th>
                   <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Nombre usuario
@@ -83,70 +91,112 @@ const NotesInProgress: React.FC = () => {
                     Creada el
                   </th>
                   <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    ID
+                    Status
                   </th>
                   <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Status
+                    Acciones
                   </th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <input
-                      type="checkbox"
-                      onChange={() => handleCheckboxChange(43)}
-                      checked={selectedNotes.includes(43)}
-                    />
-                  </td>
-                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <div className="flex items-center">
-                      <div className="ml-3">
-                        <p className="text-gray-900 whitespace-no-wrap">
-                          Sergio Marin
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p className="text-gray-900 whitespace-no-wrap">Admin</p>
-                  </td>
-                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p className="text-gray-900 whitespace-no-wrap">Jan 21, 2020</p>
-                  </td>
-                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p className="text-gray-900 whitespace-no-wrap">43</p>
-                  </td>
-                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <span className="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
-                      <span
-                        aria-hidden
-                        className="absolute inset-0 bg-green-200 opacity-50 rounded-full"
-                      ></span>
-                      <span className="relative">Activo</span>
-                    </span>
-                  </td>
-                </tr>
-                {/* Repeat other rows similarly */}
+                {notes.map((note) => (
+                  <tr key={note.id_nota}>
+                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                      <p className="text-gray-900 whitespace-no-wrap">{note.id_nota}</p>
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                      <p className="text-gray-900 whitespace-no-wrap">{localStorage.getItem('userName')}</p>
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                      <p className="text-gray-900 whitespace-no-wrap">{note.nombre}</p>
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                      <p className="text-gray-900 whitespace-no-wrap">{note.fecha}</p>
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                      <span className="relative inline-block px-3 py-1 font-semibold text-yellow-900 leading-tight">
+                        <span
+                          aria-hidden
+                          className="absolute inset-0 bg-yellow-200 opacity-50 rounded-full"
+                        ></span>
+                        <span className="relative">{note.estado}</span>
+                      </span>
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                      <button
+                        className="text-indigo-600 hover:text-indigo-900"
+                        onClick={() => handleEdit(note)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="text-red-600 hover:text-red-900 ml-4"
+                        onClick={() => handleDelete(note.id_nota)}
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
-            <div className="px-5 py-5 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">
-              <span className="text-xs xs:text-sm text-gray-900">
-                Showing 1 to 4 of 50 Entries
-              </span>
-              <div className="inline-flex mt-2 xs:mt-0">
-                <button className="text-sm text-indigo-50 transition duration-150 hover:bg-indigo-500 bg-indigo-600 font-semibold py-2 px-4 rounded-l">
-                  Prev
-                </button>
-                &nbsp; &nbsp;
-                <button className="text-sm text-indigo-50 transition duration-150 hover:bg-indigo-500 bg-indigo-600 font-semibold py-2 px-4 rounded-r">
-                  Next
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
+
+      {modalVisible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-8 shadow-lg w-96 relative">
+            <h2 className="text-2xl mb-4">Editar Nota</h2>
+            <div className="bg-gray-100 p-4 rounded-lg mb-4">
+              <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="nombre">
+                Nombre Nota
+              </label>
+              <input
+                type="text"
+                id="nombre"
+                name="nombre"
+                value={updatedNote.nombre}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
+              />
+              <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="fecha">
+                Fecha
+              </label>
+              <input
+                type="date"
+                id="fecha"
+                name="fecha"
+                value={updatedNote.fecha}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
+              />
+              <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="contenido">
+                Contenido
+              </label>
+              <textarea
+                id="contenido"
+                name="contenido"
+                value={updatedNote.contenido}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline h-32 resize-none"
+              ></textarea>
+            </div>
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              onClick={handleSave}
+            >
+              Guardar
+            </button>
+            <button
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-2"
+              onClick={() => setModalVisible(false)}
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

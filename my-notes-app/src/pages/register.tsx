@@ -1,4 +1,4 @@
-//register.tsx
+// src/pages/Register.tsx
 
 import React, { useState } from 'react';
 import axios from 'axios';
@@ -9,7 +9,6 @@ const Register: React.FC = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
     password: '',
     confirmPassword: ''
   });
@@ -41,9 +40,7 @@ const Register: React.FC = () => {
       const user = {
         id: response.data.user.id,
         nombre: formData.firstName,
-        name: formData.firstName,
-        correo: formData.email,
-        password: formData.password
+        apellido: formData.lastName
       };
       setUser(user);
       localStorage.setItem('user', JSON.stringify(user));
@@ -95,9 +92,6 @@ const Register: React.FC = () => {
                   onChange={handleChange}
                 />
               </div>
-            </div>
-            <div>
-          
             </div>
             <div>
               <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="password">

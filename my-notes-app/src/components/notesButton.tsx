@@ -1,4 +1,3 @@
-// src/components/NotesButton.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -21,7 +20,7 @@ const NotesButton: React.FC = () => {
             </span>
           </button>
           </Link>
-          <Link to ='/notesInprogress'>
+          <Link to ='/notesInProgress'>
           <button className="bg-gray-100 inline-flex py-3 px-5 rounded-lg items-center hover:bg-gray-200 focus:outline-none">
             <svg
               xmlns="http://www.w3.org/2000/svg"

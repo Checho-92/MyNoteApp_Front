@@ -1,16 +1,14 @@
-//login.tsx
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useUser } from '../context/UserContext'; // Importamos el hook useUser para acceder al contexto del usuario
+import { useUser } from '../context/UserContext';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [nombre, setNombre] = useState('');
   const [password, setPassword] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
-  const { setUser } = useUser(); // Usamos el hook useUser para obtener setUser del contexto del usuario
+  const { setUser } = useUser();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +21,7 @@ const Login: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ nombre, password }),
       });
 
       if (response.ok) {
@@ -32,11 +30,10 @@ const Login: React.FC = () => {
         localStorage.setItem('user', JSON.stringify(data.user));
         setSuccessMessage('Inicio de sesión exitoso');
 
-        // Almacenar el usuario en el contexto global y redirigir al inicio
         setUser(data.user);
         setTimeout(() => {
           navigate('/');
-        }, 1000); // Redirige después de 1 segundo
+        }, 1000);
       } else {
         setErrorMessage('Credenciales incorrectas');
       }
@@ -53,15 +50,15 @@ const Login: React.FC = () => {
         <p className="text-gray-500 text-center mb-6">Hola, Bienvenido 👋</p>
 
         <form className="mb-6" onSubmit={handleLogin}>
-          <label htmlFor="email" className="block mb-1">Correo</label>
+          <label htmlFor="nombre" className="block mb-1">Nombre</label>
           <input
-            id="email"
-            name="email"
-            type="email"
+            id="nombre"
+            name="nombre"
+            type="text"
             className="w-full mb-3 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 hover:shadow-md"
-            placeholder="Enter email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your name"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
           />
 
           <label htmlFor="password" className="block mb-1">Contraseña</label>
