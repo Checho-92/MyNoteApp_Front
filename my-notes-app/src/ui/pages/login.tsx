@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useUser } from '../context/UserContext';
+import { useUser } from '../../adapters/context/UserContext';
 
 const Login: React.FC = () => {
   const [nombre, setNombre] = useState('');

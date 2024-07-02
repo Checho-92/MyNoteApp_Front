@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useUser } from '../context/UserContext';
+import { useUser } from '../../adapters/context/UserContext'
 
 const Header: React.FC = () => {
   const { user, logout } = useUser();
@@ -17,10 +17,10 @@ const Header: React.FC = () => {
         <div className="flex items-center space-x-4">
           {user ? (
             <>
-              <span>Hola, {user.nombre}!</span>
+              <span className="text-gray-900">Bienvenido, {user.nombre}</span>
               <button
-                className="bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mt-4 md:mt-0"
                 onClick={logout}
+                className="bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mt-4 md:mt-0"
               >
                 Salir
               </button>
@@ -34,7 +34,7 @@ const Header: React.FC = () => {
               </Link>
               <Link to="/register">
                 <button className="bg-green-500 text-white border-0 py-1 px-3 focus:outline-none hover:bg-green-600 rounded text-base mt-4 md:mt-0">
-                  Regístrate
+                  Registrate
                 </button>
               </Link>
             </>

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { useUser } from '../context/UserContext';
+import { useUser } from '../../adapters/context/UserContext';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({

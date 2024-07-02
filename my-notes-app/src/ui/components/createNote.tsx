@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 interface Note {
@@ -7,7 +7,7 @@ interface Note {
   content: string;
 }
 
-const App: React.FC = () => {
+const CreateNotes: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -78,4 +78,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default CreateNotes;
