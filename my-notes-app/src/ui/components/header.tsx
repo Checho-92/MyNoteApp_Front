@@ -28,12 +28,12 @@ const Header: React.FC = () => {
           ) : (
             <>
               <Link to="/login">
-                <button className="bg-indigo-500 text-white border-0 py-1 px-3 focus:outline-none hover:bg-indigo-600 rounded text-base mt-4 md:mt-0">
+                <button className="bg-gray-700 text-white border-0 py-1 px-3 focus:outline-none hover:bg-yellow-300 rounded text-base mt-4 md:mt-0">
                   Inicia sesión
                 </button>
               </Link>
-              <Link to="/register">
-                <button className="bg-green-500 text-white border-0 py-1 px-3 focus:outline-none hover:bg-green-600 rounded text-base mt-4 md:mt-0">
+              <Link to="/registro">
+                <button className="bg-gray-700 text-white border-0 py-1 px-3 focus:outline-none hover:bg-yellow-300 rounded text-base mt-4 md:mt-0">
                   Registrate
                 </button>
               </Link>

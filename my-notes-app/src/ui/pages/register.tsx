@@ -58,20 +58,20 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center" style={{ backgroundImage: `url('./public/img/fondo_inicio.jpg')` }}>
+    <div className="min-h-screen bg-cover bg-center" style={{ backgroundImage: `url('.)` }}>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-md mx-auto bg-white rounded-xl shadow-md p-6">
-          <h3 className="text-2xl text-center mb-4">Regístrate</h3>
+          <h3 className="text-yellow-300 text-center mb-4 text-2xl">Regístrate</h3>
           {error && <div className="text-red-500 text-center mb-4">{error}</div>}
           {success && <div className="text-green-500 text-center mb-4">{success}</div>}
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="firstName">
-                  Nombres
+                  Nombre
                 </label>
                 <input
-                  className="w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
+                  className="w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline hover:shadow-md"
                   id="firstName"
                   type="text"
                   placeholder="First Name"
@@ -81,10 +81,10 @@ const Register: React.FC = () => {
               </div>
               <div>
                 <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="lastName">
-                  Apellidos
+                  Apellido
                 </label>
                 <input
-                  className="w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
+                  className="w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline hover:shadow-md"
                   id="lastName"
                   type="text"
                   placeholder="Last Name"
@@ -98,7 +98,7 @@ const Register: React.FC = () => {
                 Contraseña
               </label>
               <input
-                className="w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
+                className="w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline hover:shadow-md"
                 id="password"
                 type="password"
                 placeholder="**********"
@@ -111,7 +111,7 @@ const Register: React.FC = () => {
                 Confirmar Contraseña
               </label>
               <input
-                className="w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
+                className="w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline hover:shadow-md"
                 id="confirmPassword"
                 type="password"
                 placeholder="**********"
@@ -119,18 +119,14 @@ const Register: React.FC = () => {
                 onChange={handleChange}
               />
             </div>
-            <button className="w-full px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700 focus:outline-none focus:shadow-outline" type="submit">
+            <button className="w-full px-4 py-2 font-bold text-white bg-gray-700 rounded-full hover:text-yellow-300 focus:outline-none focus:shadow-outline hover:shadow-md" type="submit">
               Registrar cuenta
             </button>
           </form>
           <hr className="border-t" />
+          
           <div className="text-center">
-            <a className="text-sm text-blue-500 hover:text-blue-800" href="#">
-              ¿Olvidaste tu contraseña?
-            </a>
-          </div>
-          <div className="text-center">
-            <Link to='/login' className="text-sm text-blue-500 hover:text-blue-800">
+            <Link to='/login' className="text-sm text-yellow-300 hover:text-gray-700">
               ¿Ya tienes una cuenta? Inicia sesión
             </Link>
           </div>
