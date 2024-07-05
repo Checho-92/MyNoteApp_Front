@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { useUser } from '../../adapters/context/UserContext';
+import { useUser } from '../../context/UserContext';
 import Modal from 'react-modal';
 
 Modal.setAppElement('#root'); // Set the root element for accessibility
