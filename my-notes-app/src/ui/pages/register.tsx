@@ -1,9 +1,10 @@
-// src/pages/Register.tsx
-
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../../adapters/context/UserContext';
+import Modal from 'react-modal';
+
+Modal.setAppElement('#root'); // Set the root element for accessibility
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -12,8 +13,9 @@ const Register: React.FC = () => {
     password: '',
     confirmPassword: ''
   });
-  const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<string>('');
+  const [modalMessage, setModalMessage] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalColor, setModalColor] = useState<string>('text-yellow-300'); // Default color for success message
   const navigate = useNavigate();
   const { setUser } = useUser();
 
@@ -27,14 +29,15 @@ const Register: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(''); // Limpiar mensaje de error
-    setSuccess(''); // Limpiar mensaje de éxito
+    setModalMessage('');
 
     try {
       const response = await axios.post('http://localhost:3000/api/user/register', formData);
       
       // Mostrar mensaje de éxito
-      setSuccess(response.data.message);
+      setModalMessage(response.data.message);
+      setModalColor('text-yellow-300'); // Set color to green for success message
+      setIsModalOpen(true);
 
       // Almacenar el usuario en el contexto global y redirigir al inicio
       const user = {
@@ -50,11 +53,17 @@ const Register: React.FC = () => {
     } catch (err) {
       console.error(err);
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || 'Error al registrar el usuario');
+        setModalMessage(err.response?.data?.message || 'Error al registrar el usuario');
       } else {
-        setError('Error al registrar el usuario');
+        setModalMessage('Error al registrar el usuario');
       }
+      setModalColor('text-red-500'); // Set color to red for error message
+      setIsModalOpen(true);
     }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -62,8 +71,6 @@ const Register: React.FC = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-md mx-auto bg-white rounded-xl shadow-md p-6">
           <h3 className="text-yellow-300 text-center mb-4 text-2xl">Regístrate</h3>
-          {error && <div className="text-red-500 text-center mb-4">{error}</div>}
-          {success && <div className="text-green-500 text-center mb-4">{success}</div>}
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -132,6 +139,21 @@ const Register: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        contentLabel="Registro de Usuario"
+        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+      >
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h2 className="text-xl mb-4 text-gray-700">Mensaje</h2>
+          <p className={modalColor}>{modalMessage}</p>
+          <button onClick={closeModal} className="mt-4 bg-gray-700 text-white px-4 py-2 rounded">
+            Cerrar
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
