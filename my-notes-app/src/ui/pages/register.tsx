@@ -32,7 +32,7 @@ const Register: React.FC = () => {
     setModalMessage('');
 
     try {
-      const response = await axios.post('http://localhost:3000/api/user/register', formData);
+      const response = await axios.post('http://localhost:3000/api/register', formData);
       
       // Mostrar mensaje de éxito
       setModalMessage(response.data.message);

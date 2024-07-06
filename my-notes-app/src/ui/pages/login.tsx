@@ -18,8 +18,14 @@ const Login: React.FC = () => {
     e.preventDefault();
     setModalMessage('');
 
+    if (!nombre || !password) {
+      setModalMessage('Por favor ingresa tu nombre y contraseña.');
+      setModalColor('text-red-500');
+      setIsModalOpen(true);
+      return;
+        } 
     try {
-      const response = await fetch('http://localhost:3000/api/user/login', {
+      const response = await fetch('http://localhost:3000/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,7 +96,6 @@ const Login: React.FC = () => {
                 <input type="checkbox" id="remember" className="w-4 h-4 border-gray-300 focus:bg-indigo-600" />
                 <span className="ml-2 text-gray-700">Recuérdame</span>
               </label>
-              <a href="#" className="text-sm text-gray-700 hover:text-yellow-300">¿Olvidaste tu contraseña?</a>
             </div>
 
             <button className="w-full px-4 py-2 font-bold text-white bg-gray-700 rounded-full hover:text-yellow-300 focus:outline-none focus:shadow-outline hover:shadow-md">

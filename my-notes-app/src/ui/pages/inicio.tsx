@@ -2,61 +2,112 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/sideBar';
+import Modal from 'react-modal';
+import { useUser } from '../../context/UserContext'; // Importar el contexto del usuario
+
+Modal.setAppElement('#root'); // Set the root element for accessibility
 
 // Interfaz para definir la estructura de una nota
 export interface Note {
   id: string;
   title: string;
   content: string;
+  date: string;
+  estado: string;
 }
 
 const Inicio: React.FC = () => {
-  // Estado para almacenar las notas
   const [notes, setNotes] = useState<Note[]>([]);
-  // Estado para almacenar el título de la nota en el formulario
   const [title, setTitle] = useState('');
-  // Estado para almacenar el contenido de la nota en el formulario
   const [content, setContent] = useState('');
-  // Estado para manejar la nota que se está editando
   const [editingNote, setEditingNote] = useState<Note | null>(null);
-  // Estado para manejar la nota seleccionada en la vista
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [modalMessage, setModalMessage] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalColor, setModalColor] = useState<string>('text-green-600'); // Default color for success message
+  const { user } = useUser(); // Obtener el usuario del contexto
 
-  // Hook useEffect para cargar las notas cuando el componente se monta
+  const token = localStorage.getItem('token');
+
   useEffect(() => {
-    fetchNotes();
-  }, []);
+    if (user) {
+      fetchNotes(user.id);
+    }
+  }, [user]);
 
   // Función para obtener las notas desde el servidor
-  const fetchNotes = async () => {
+  const fetchNotes = async (userId: number) => {
     try {
-      const response = await axios.get('/api/notes');
+      const response = await axios.get(`http://localhost:3000/api/notes/user/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (Array.isArray(response.data)) {
         setNotes(response.data); // Actualiza el estado con las notas obtenidas
       } else {
         setNotes([]); // Si no es un array, establece el estado como vacío
       }
     } catch (error) {
-      setNotes([]); // En caso de error, establece el estado como vacío
+      if (error instanceof Error) {
+        setModalMessage(`Error al obtener las notas: ${error.message}`);
+      } else {
+        setModalMessage('Error desconocido al obtener las notas.');
+      }
+      setModalColor('text-red-500'); // Set color to red for error message
+      setIsModalOpen(true);
     }
   };
 
   // Función para manejar la creación o actualización de una nota
   const handleSaveNote = async () => {
     try {
+      const noteData = {
+        nombre: title,
+        contenido: content,
+        id_usuario: user?.id,
+        estado: 'Pendiente',
+        fecha: new Date().toISOString().split('T')[0]
+      };
+
+      if (!noteData.nombre) {
+        setModalMessage('El título de la nota es obligatorio.');
+        setModalColor('text-red-500'); // Set color to red for error message
+        setIsModalOpen(true);
+        return;
+      }
+      if (!noteData.contenido) {
+        setModalMessage('El contenido de la nota es obligatorio.');
+        setModalColor('text-red-500'); // Set color to red for error message
+        setIsModalOpen(true);
+        return;
+      }
+
       if (editingNote) {
         // Si hay una nota en edición, actualiza la nota existente
-        await axios.put(`/api/notes/${editingNote.id}`, { title, content });
+        await axios.put(`http://localhost:3000/api/notes/${editingNote.id}`, noteData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setModalMessage('Nota actualizada exitosamente');
       } else {
         // Si no hay nota en edición, crea una nueva nota
-        await axios.post('/api/notes', { title, content });
+        await axios.post('http://localhost:3000/api/notes', noteData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setModalMessage('Nota creada exitosamente');
       }
+      setModalColor('text-green-600'); // Set color to green for success message
+      setIsModalOpen(true);
       setTitle(''); // Limpia el campo de título
       setContent(''); // Limpia el campo de contenido
       setEditingNote(null); // Resetea el estado de edición
-      fetchNotes(); // Vuelve a cargar las notas
+      if (user) fetchNotes(user.id); // Vuelve a cargar las notas
     } catch (error) {
-      // Manejo de errores (puede agregar lógica de manejo de errores aquí)
+      if (error instanceof Error) {
+        setModalMessage(`Error al guardar la nota: ${error.message}`);
+      } else {
+        setModalMessage('Error desconocido al guardar la nota.');
+      }
+      setModalColor('text-red-500'); // Set color to red for error message
+      setIsModalOpen(true);
     }
   };
 
@@ -70,16 +121,32 @@ const Inicio: React.FC = () => {
   // Función para manejar la eliminación de una nota
   const handleDeleteNote = async (id: string) => {
     try {
-      await axios.delete(`/api/notes/${id}`); // Elimina la nota por su ID
-      fetchNotes(); // Vuelve a cargar las notas
+      await axios.delete(`http://localhost:3000/api/notes/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }); // Elimina la nota por su ID
+      setModalMessage('Nota eliminada exitosamente');
+      setModalColor('text-green-600'); // Set color to green for success message
+      setIsModalOpen(true);
+      if (user) fetchNotes(user.id); // Vuelve a cargar las notas
     } catch (error) {
-      // Manejo de errores (puede agregar lógica de manejo de errores aquí)
+      if (error instanceof Error) {
+        setModalMessage(`Error al eliminar la nota: ${error.message}`);
+      } else {
+        setModalMessage('Error desconocido al eliminar la nota.');
+      }
+      setModalColor('text-red-500'); // Set color to red for error message
+      setIsModalOpen(true);
     }
   };
 
   // Función para manejar la selección de una nota
   const handleSelectNote = (note: Note) => {
     setSelectedNote(note); // Establece la nota seleccionada
+  };
+
+  // Función para cerrar el modal
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -149,6 +216,20 @@ const Inicio: React.FC = () => {
           )}
         </div>
       </div>
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        contentLabel="Mensaje de Nota"
+        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+      >
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h2 className="text-xl mb-4 text-gray-700">Mensaje</h2>
+          <p className={modalColor}>{modalMessage}</p>
+          <button onClick={closeModal} className="mt-4 bg-gray-700 text-white px-4 py-2 rounded">
+            Cerrar
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 };
