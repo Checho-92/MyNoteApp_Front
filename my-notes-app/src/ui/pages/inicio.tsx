@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import Sidebar from '../components/sideBar';
+// src/pages/Inicio.tsx
+import React, { useState, useEffect } from 'react';
+import Sidebar from '../components/sideBar'; // Asegúrate de importar Sidebar y SidebarProps desde el componente correcto
 import Modal from 'react-modal';
 import { useUser } from '../../context/UserContext';
-import { useNoteContext, Note } from '../../context/NoteContext'; // Asegúrate de ajustar la ruta según tu estructura de archivos
+import { useNoteContext, Note } from '../../context/NoteContext';
 
 Modal.setAppElement('#root'); // Set the root element for accessibility
 
@@ -15,23 +16,31 @@ const Inicio: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalColor, setModalColor] = useState<string>('text-green-600'); // Default color for success message
   const { user } = useUser(); // Obtener el usuario del contexto
-  const { addNote, updateNote, deleteNote } = useNoteContext(); // Obtener las funciones del contexto de notas
+  const { fetchNotes, addNote, updateNote, deleteNote } = useNoteContext(); // Obtener las funciones del contexto de notas
+
+  useEffect(() => {
+    if (user) {
+      fetchNotes(user.id); // Fetch notes when the component mounts
+    }
+  }, [user]);
 
   // Función para manejar la creación o actualización de una nota
   const handleSaveNote = async () => {
     try {
       const noteData = {
-        title,
-        content,
+        nombre: title,
+        contenido: content,
+        id_usuario: user?.id!,
+        estado: 'Pendiente',
       };
 
-      if (!noteData.title) {
+      if (!noteData.nombre) {
         setModalMessage('El título de la nota es obligatorio.');
         setModalColor('text-red-500'); // Set color to red for error message
         setIsModalOpen(true);
         return;
       }
-      if (!noteData.content) {
+      if (!noteData.contenido) {
         setModalMessage('El contenido de la nota es obligatorio.');
         setModalColor('text-red-500'); // Set color to red for error message
         setIsModalOpen(true);
@@ -40,17 +49,11 @@ const Inicio: React.FC = () => {
 
       if (editingNote) {
         // Si hay una nota en edición, actualiza la nota existente
-        await updateNote(editingNote.id, noteData);
+        await updateNote(editingNote.id_nota!, noteData);
         setModalMessage('Nota actualizada exitosamente');
       } else {
         // Si no hay nota en edición, crea una nueva nota
-        await addNote({
-          ...noteData,
-          id_usuario: user?.id,
-          estado: 'Pendiente',
-          fecha: new Date().toISOString().split('T')[0],
-          nombre: user?.nombre || '', // Asegurarse de tener el nombre del usuario
-        });
+        await addNote(noteData);
         setModalMessage('Nota creada exitosamente');
       }
       setModalColor('text-green-600'); // Set color to green for success message
@@ -71,8 +74,8 @@ const Inicio: React.FC = () => {
 
   // Función para manejar la edición de una nota
   const handleEditNote = (note: Note) => {
-    setTitle(note.title); // Establece el título de la nota en el formulario
-    setContent(note.content); // Establece el contenido de la nota en el formulario
+    setTitle(note.nombre); // Establece el título de la nota en el formulario
+    setContent(note.contenido); // Establece el contenido de la nota en el formulario
     setEditingNote(note); // Establece la nota en edición
   };
 
@@ -104,13 +107,17 @@ const Inicio: React.FC = () => {
     setIsModalOpen(false);
   };
 
+
+    
+
+
   return (
     <div className="flex">
-      <Sidebar
-        onSelectNote={handleSelectNote}
-        onEditNote={handleEditNote}
-        onDeleteNote={handleDeleteNote}
-      />
+      <Sidebar 
+       onSelectNote = {handleSelectNote}
+       onDeleteNote = {handleDeleteNote}
+       onEditNote = {handleEditNote} 
+       />
       <div className="min-h-screen bg-cover bg-center flex-1" style={{ backgroundImage: `url('')` }}>
         <div className="container mx-auto px-4 py-4">
           <div className="bg-white rounded-xl shadow-md p-6">
@@ -142,9 +149,10 @@ const Inicio: React.FC = () => {
             </div>
             {selectedNote && (
               <div className="bg-white rounded-xl shadow-md p-6 mt-4">
-                <h2 className="text-2xl font-bold">{selectedNote.title}</h2>
-                <p>{selectedNote.content}</p>
-                <p>{selectedNote.nombre}</p> {/* Mostramos el nombre de la nota */}
+                <h2 className="text-2xl font-bold">{selectedNote.nombre}</h2>
+                <p>{selectedNote.contenido}</p>
+                <p>{selectedNote.fecha?.toString()}</p> {/* Mostramos la fecha de la nota */}
+                <p>{selectedNote.estado}</p> {/* Mostramos el estado de la nota */}
               </div>
             )}
           </div>

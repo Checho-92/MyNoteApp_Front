@@ -1,20 +1,21 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+// src/context/NoteContext.ts
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import axios from 'axios';
 
 // Interfaz para definir la estructura de una nota
 export interface Note {
-  id: number;
-  title: string;
-  content: string;
-  date: Date;
+  id_nota?: number;
+  id_usuario: number;
+  nombre: string;
+  fecha?: Date;
   estado: string;
-  nombre: string; // Añadimos el campo nombre
+  contenido: string;
 }
 
 interface NoteContextType {
   notes: Note[];
   fetchNotes: (userId: number) => Promise<void>;
-  addNote: (note: Omit<Note, 'id' | 'date'>) => Promise<void>;
+  addNote: (note: Omit<Note, 'id_nota' | 'fecha'>) => Promise<void>;
   updateNote: (id: number, noteData: Partial<Note>) => Promise<void>;
   deleteNote: (id: number) => Promise<void>;
 }
@@ -36,12 +37,11 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const addNote = async (note: Omit<Note, 'id' | 'date'>) => {
+  const addNote = async (note: Omit<Note, 'id_nota' | 'fecha'>) => {
     try {
       const token = localStorage.getItem('token');
       const newNote = {
         ...note,
-        id_usuario: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') as string).id : null,
         estado: 'Pendiente',
         fecha: new Date().toISOString().split('T')[0],
       };
@@ -60,7 +60,7 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await axios.put(`http://localhost:3000/api/notes/${id}`, noteData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const updatedNotes = notes.map(note => (note.id === id ? { ...note, ...noteData } : note));
+      const updatedNotes = notes.map(note => (note.id_nota === id ? { ...note, ...noteData } : note));
       setNotes(updatedNotes); // Actualizar la nota en el estado local
     } catch (error) {
       console.error('Error al actualizar la nota:', error);
@@ -73,7 +73,7 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await axios.delete(`http://localhost:3000/api/notes/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const updatedNotes = notes.filter(note => note.id !== id);
+      const updatedNotes = notes.filter(note => note.id_nota !== id);
       setNotes(updatedNotes); // Eliminar la nota del estado local
     } catch (error) {
       console.error('Error al eliminar la nota:', error);
