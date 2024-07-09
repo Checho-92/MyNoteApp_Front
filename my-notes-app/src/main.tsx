@@ -7,6 +7,7 @@ import Register from '../src/ui/pages/register';
 import Login from '../src/ui/pages/login';
 import Inicio from './ui/pages/inicio';
 import '../src/index.css'
+import { NoteProvider } from './context/NoteContext';
 
 const router = createBrowserRouter([
   {
@@ -31,8 +32,10 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+    <NoteProvider>
     <UserProvider>
       <RouterProvider router={router} />
     </UserProvider>
+    </NoteProvider>
   </React.StrictMode>,
 );

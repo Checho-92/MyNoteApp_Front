@@ -27,13 +27,42 @@ const Register: React.FC = () => {
     }));
   };
 
+  const validatePassword = (password: string) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+    return regex.test(password);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setModalMessage('');
 
+    // Validación de campos vacíos
+    if (!formData.firstName || !formData.lastName || !formData.password || !formData.confirmPassword) {
+      setModalMessage('Por favor, rellena todos los campos.');
+      setModalColor('text-red-500'); // Set color to red for error message
+      setIsModalOpen(true);
+      return;
+    }
+
+    // Validación de contraseña
+    if (!validatePassword(formData.password)) {
+      setModalMessage('La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula y una minúscula.');
+      setModalColor('text-red-500'); // Set color to red for error message
+      setIsModalOpen(true);
+      return;
+    }
+
+    // Validación de confirmación de contraseña
+    if (formData.password !== formData.confirmPassword) {
+      setModalMessage('Las contraseñas no coinciden.');
+      setModalColor('text-red-500'); // Set color to red for error message
+      setIsModalOpen(true);
+      return;
+    }
+
     try {
       const response = await axios.post('http://localhost:3000/api/register', formData);
-      
+
       // Mostrar mensaje de éxito
       setModalMessage(response.data.message);
       setModalColor('text-yellow-300'); // Set color to green for success message
@@ -67,7 +96,7 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center" style={{ backgroundImage: `url('.)` }}>
+    <div className="min-h-screen bg-cover bg-center" style={{ backgroundImage: `url('.')` }}>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-md mx-auto bg-white rounded-xl shadow-md p-6">
           <h3 className="text-yellow-300 text-center mb-4 text-2xl">Regístrate</h3>

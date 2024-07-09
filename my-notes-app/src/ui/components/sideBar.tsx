@@ -1,42 +1,39 @@
-// src/components/Sidebar.tsx
-import React, { useState } from 'react';
-import { Note } from '../pages/inicio'; // Asegúrate de exportar la interfaz Note desde Inicio
+import React, { useEffect } from 'react';
+import { useNoteContext, Note } from '../../context/NoteContext'; // Importar el contexto de notas
+import { useUser } from '../../context/UserContext'; // Importar el contexto del usuario
 
 interface SidebarProps {
-  notes: Note[];
   onSelectNote: (note: Note) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ notes, onSelectNote }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+const Sidebar: React.FC<SidebarProps> = ({ onSelectNote }) => {
+  const { user } = useUser(); // Obtener el usuario del contexto
+  const { notes, fetchNotes } = useNoteContext(); // Obtener notas y función para establecer notas del contexto de notas
 
-  const filteredNotes = notes.filter(note =>
-    note.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    if (user) {
+      fetchNotes(user.id); // Obtener las notas del usuario actual
+    }
+  }, [user, fetchNotes]); // Ejecutar efecto cuando el usuario cambie o cuando fetchNotes cambie
 
   return (
-        <div className="w-1/5 bg-white text-yellow-300 p-4 min-h-screen">
-                <h2 className="text-2xl  font-semibold mb-6 mt-4">Notas</h2>
-                <input
-                    type="text"
-                    placeholder="Buscar notas..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
-                />
-                <ul className='min-h-80'>
-                    {filteredNotes.map(note => (
-                    <li
-                        key={note.id}
-                        onClick={() => onSelectNote(note)}
-                        className="cursor-pointer mb-2 hover:bg-gray-700 p-2 rounded"
-                    >
-                        {note.title}
-                    </li>
-                    ))}
-            </ul>
-        </div>
-    
+    <nav aria-label="Sidebar" className="hidden lg:block flex-shrink-0 bg-gray-800 overflow-y-auto">
+      <div className="relative w-40 flex space-y-16 flex-col p-3">
+        {notes.map((note) => (
+          <a
+            key={note.id?.toString()}
+            href="#"
+            onClick={() => onSelectNote(note)}
+            className="text-white hover:text-red-700"
+          >
+            <div className="flex-shrink-0 inline-flex items-center justify-center w-14">
+              <i className="fa fa-sticky-note"></i>
+            </div>
+            <div className="text-center text-xs font-normal">{note.title}</div>
+          </a>
+        ))}
+      </div>
+    </nav>
   );
 };
 
