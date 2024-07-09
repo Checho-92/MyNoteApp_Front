@@ -19,14 +19,18 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelectNote }) => {
   }, [user]); // Ejecutar efecto cuando el usuario cambie o cuando fetchNotes cambie
 
   return (
-    <nav aria-label="Sidebar" className="hidden lg:block flex-shrink-0 bg-gray-800 overflow-y-auto">
-      <div className="relative w-40 flex space-y-16 flex-col p-3">
+      <nav  aria-label="Sidebar" className="lg:w-40 md:w-1/3 sm:w-full bg-white p-0 h-screen scroll-smooth overflow-y-auto">
+        <div className="bg-white rounded-xl shadow-md p-6">
+    <div className="text-yellow-300 text-2xl text-center ">
+      <p className=''>Notas</p>
+    </div>
+
         {notes.map((note) => (
           <a
             key={note.id_nota?.toString()}
             href="#"
             onClick={() => onSelectNote(note)}
-            className="text-white hover:text-red-700"
+            className="text-gray-800  hover:text-red-700"
           >
             <div className="flex-shrink-0 inline-flex items-center justify-center w-14">
               <i className="fa fa-sticky-note"></i>
@@ -34,8 +38,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelectNote }) => {
             <div className="text-center text-xs font-normal">{note.nombre}</div>
           </a>
         ))}
-      </div>
-    </nav>
+          </div>
+      </nav>
+   
   );
 };
 

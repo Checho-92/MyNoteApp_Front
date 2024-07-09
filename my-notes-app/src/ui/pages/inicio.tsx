@@ -1,6 +1,5 @@
-// src/pages/Inicio.tsx
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../components/sideBar'; // Asegúrate de importar Sidebar y SidebarProps desde el componente correcto
+import Sidebar from '../components/sideBar'; // Asegúrate de importar el componente Sidebar correctamente
 import Modal from 'react-modal';
 import { useUser } from '../../context/UserContext';
 import { useNoteContext, Note } from '../../context/NoteContext';
@@ -77,6 +76,7 @@ const Inicio: React.FC = () => {
     setTitle(note.nombre); // Establece el título de la nota en el formulario
     setContent(note.contenido); // Establece el contenido de la nota en el formulario
     setEditingNote(note); // Establece la nota en edición
+    setSelectedNote(note); // Establece la nota seleccionada
   };
 
   // Función para manejar la eliminación de una nota
@@ -86,6 +86,10 @@ const Inicio: React.FC = () => {
       setModalMessage('Nota eliminada exitosamente');
       setModalColor('text-green-600'); // Set color to green for success message
       setIsModalOpen(true);
+      setTitle(''); // Limpia el campo de título después de eliminar
+      setContent(''); // Limpia el campo de contenido después de eliminar
+      setEditingNote(null); // Resetea el estado de edición
+      setSelectedNote(null); // Resetea la nota seleccionada
     } catch (error) {
       if (error instanceof Error) {
         setModalMessage(`Error al eliminar la nota: ${error.message}`);
@@ -97,9 +101,12 @@ const Inicio: React.FC = () => {
     }
   };
 
-  // Función para manejar la selección de una nota
+  // Función para manejar la selección de una nota desde el Sidebar
   const handleSelectNote = (note: Note) => {
     setSelectedNote(note); // Establece la nota seleccionada
+    setTitle(note.nombre); // Establece el título de la nota en el formulario
+    setContent(note.contenido); // Establece el contenido de la nota en el formulario
+    setEditingNote(note); // Establece la nota en edición
   };
 
   // Función para cerrar el modal
@@ -107,55 +114,57 @@ const Inicio: React.FC = () => {
     setIsModalOpen(false);
   };
 
-
-    
-
-
   return (
     <div className="flex">
-      <Sidebar 
-       onSelectNote = {handleSelectNote}
-       onDeleteNote = {handleDeleteNote}
-       onEditNote = {handleEditNote} 
-       />
+      <Sidebar
+        onSelectNote={handleSelectNote}
+        onDeleteNote={handleDeleteNote}
+        onEditNote={handleEditNote}
+      />
       <div className="min-h-screen bg-cover bg-center flex-1" style={{ backgroundImage: `url('')` }}>
         <div className="container mx-auto px-4 py-4">
           <div className="bg-white rounded-xl shadow-md p-6">
+            <h1 className="text-yellow-300 text-2xl text-center mb-4">Crea o Edita tu Nota</h1>
             <div>
-              <h1 className="text-yellow-300 text-2xl text-center mb-4">Crea tu nueva Nota</h1>
-              <div>
-                <input
-                  type="text"
-                  placeholder="Título"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="block w-full p-2 leading-tight border rounded shadow appearance-none focus:outline-none focus:shadow-outline hover:shadow-md mb-2"
-                />
-                <textarea
-                  placeholder="Contenido"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="block w-full p-2 leading-tight border rounded shadow appearance-none focus:outline-none focus:shadow-outline hover:shadow-md mb-2 min-h-80"
-                />
-                <div className='flex justify-between'>
+              <input
+                type="text"
+                placeholder="Título"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="block w-full p-2 mb-2 border rounded shadow appearance-none focus:outline-none focus:shadow-outline hover:shadow-md"
+              />
+              <textarea
+                placeholder="Contenido"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="block w-full p-2 mb-2 border rounded shadow appearance-none focus:outline-none focus:shadow-outline hover:shadow-md min-h-80"
+              />
+              <div className="flex justify-between">
+                <button
+                  onClick={handleSaveNote}
+                  className="block w-full bg-gray-700 hover:bg-gray-500 text-white p-2 rounded"
+                >
+                  {editingNote ? 'Actualizar Nota' : 'Agregar Nota'}
+                </button>
+                {editingNote && (
                   <button
-                    onClick={handleSaveNote}
-                    className="block w-full bg-gray-700 hover:bg-gray-500 text-white p-2 rounded w-1/2 mr-1"
+                    onClick={() => handleDeleteNote(editingNote.id_nota!)}
+                    className="block w-full bg-red-600 hover:bg-red-500 text-white p-2 rounded ml-2"
                   >
-                    {editingNote ? 'Actualizar Nota' : 'Agregar Nota'}
+                    Eliminar Nota
                   </button>
-                </div>
+                )}
               </div>
             </div>
-            {selectedNote && (
-              <div className="bg-white rounded-xl shadow-md p-6 mt-4">
-                <h2 className="text-2xl font-bold">{selectedNote.nombre}</h2>
-                <p>{selectedNote.contenido}</p>
-                <p>{selectedNote.fecha?.toString()}</p> {/* Mostramos la fecha de la nota */}
-                <p>{selectedNote.estado}</p> {/* Mostramos el estado de la nota */}
-              </div>
-            )}
           </div>
+          {selectedNote && (
+            <div className="bg-white rounded-xl shadow-md p-6 mt-4">
+              <h2 className="text-2xl font-bold">{selectedNote.nombre}</h2>
+              <p>{selectedNote.contenido}</p>
+              <p>{selectedNote.fecha?.toString()}</p> {/* Mostramos la fecha de la nota */}
+              <p>{selectedNote.estado}</p> {/* Mostramos el estado de la nota */}
+            </div>
+          )}
         </div>
       </div>
       <Modal
