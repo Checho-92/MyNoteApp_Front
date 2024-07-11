@@ -13,6 +13,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelectNote, onCompleteNotes }) => {
   const { notes, fetchNotes } = useNoteContext(); // Obtener notas y función para establecer notas del contexto de notas
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedNotes, setSelectedNotes] = useState<number[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
     if (user) {
@@ -33,8 +34,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelectNote, onCompleteNotes }) => {
   };
 
   const handleCompleteNotes = () => {
+    if (selectedNotes.length === 0) {
+      setErrorMessage('Debe seleccionar al menos una nota para completar.');
+      return;
+    }
     onCompleteNotes(selectedNotes);
     setSelectedNotes([]);
+    setErrorMessage(''); // Limpiar el mensaje de error si las notas se completan correctamente
   };
 
   return (
@@ -57,13 +63,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelectNote, onCompleteNotes }) => {
         </div>
         {filteredNotes.map((note, index) => (
           <React.Fragment key={note.id_nota?.toString()}>
-            <div className="flex items-center  justify-between mb-4 mt-4">
+            <div className="flex items-center justify-between mb-4 mt-4">
               <a
                 href="#"
                 onClick={() => onSelectNote(note)}
                 className="text-gray-800 hover:text-red-700 flex-1 flex items-start"
               >
-                
                 <div className="ml-2 text-start text-xs font-normal">{note.nombre}</div>
               </a>
               <input
@@ -78,6 +83,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelectNote, onCompleteNotes }) => {
             )}
           </React.Fragment>
         ))}
+        {errorMessage && (
+          <div className="text-red-500 text-center mb-2">
+            {errorMessage}
+          </div>
+        )}
         <button onClick={handleCompleteNotes} className="mt-4 bg-gray-700 text-white p-2 rounded">
           Completar seleccionadas
         </button>

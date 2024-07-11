@@ -3,7 +3,6 @@ import Sidebar from '../components/sideBar'; // Asegúrate de importar el compon
 import Modal from 'react-modal';
 import { useUser } from '../../context/UserContext';
 import { useNoteContext, Note } from '../../context/NoteContext';
-import axios from 'axios';
 
 Modal.setAppElement('#root'); // Set the root element for accessibility
 
@@ -16,7 +15,7 @@ const Inicio: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalColor, setModalColor] = useState<string>('text-green-600'); // Default color for success message
   const { user } = useUser(); // Obtener el usuario del contexto
-  const {fetchNotes, addNote, updateNote, deleteNote } = useNoteContext(); // Obtener las funciones del contexto de notas
+  const {fetchNotes, addNote, updateNote, deleteNote, updateMultipleNotes } = useNoteContext(); // Obtener las funciones del contexto de notas
 
   useEffect(() => {
     if (user) {
@@ -90,23 +89,12 @@ const Inicio: React.FC = () => {
     }
   };
 
-  const handleSelectNote = (note: Note) => {
-    setSelectedNote(note);
-    setTitle(note.nombre);
-    setContent(note.contenido);
-    setEditingNote(note);
-  };
-
   const handleCompleteNotes = async (noteIds: number[]) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.put('http://localhost:3000/api/notes/multiple', { noteIds, estado: 'Completada' }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setModalMessage('Notas completadas exitosamente');
+      await updateMultipleNotes(noteIds, 'Completada');
+      setModalMessage('Notas actualizadas a completadas exitosamente.');
       setModalColor('text-green-600');
       setIsModalOpen(true);
-      fetchNotes(user!.id);
     } catch (error) {
       setModalMessage(`Error al completar las notas: ${error instanceof Error ? error.message : 'Error desconocido'}`);
       setModalColor('text-red-500');
@@ -114,15 +102,15 @@ const Inicio: React.FC = () => {
     }
   };
 
-
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
+
   return (
     <div className="flex">
       <Sidebar
-        onSelectNote={handleSelectNote}
+        onSelectNote={handleEditNote}
         onEditNote={handleEditNote}
         onCompleteNotes={handleCompleteNotes}
       />

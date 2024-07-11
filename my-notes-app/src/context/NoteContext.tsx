@@ -17,6 +17,7 @@ interface NoteContextType {
   fetchNotes: (userId: number) => Promise<void>;
   addNote: (note: Omit<Note, 'id_nota' | 'fecha'>) => Promise<void>;
   updateNote: (id: number, noteData: Partial<Note>) => Promise<void>;
+  updateMultipleNotes: (noteIds: number[], estado: string) => Promise<void>;
   deleteNote: (id: number) => Promise<void>;
 }
 
@@ -68,6 +69,22 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const updateMultipleNotes = async (noteIds: number[], estado: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(`http://localhost:3000/api/multiple`, { noteIds, estado }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const updatedNotes = notes.map(note => 
+        noteIds.includes(note.id_nota!) ? { ...note, estado } : note
+      );
+      setNotes(updatedNotes); // Actualizar las notas en el estado local
+    } catch (error) {
+      console.error('Error al actualizar múltiples notas:', error);
+    }
+  };
+
+
   const deleteNote = async (id: number) => {
     try {
       const token = localStorage.getItem('token');
@@ -82,7 +99,7 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <NoteContext.Provider value={{ notes, fetchNotes, addNote, updateNote, deleteNote }}>
+    <NoteContext.Provider value={{ notes, fetchNotes, addNote, updateNote, deleteNote, updateMultipleNotes }}>
       {children}
     </NoteContext.Provider>
   );
