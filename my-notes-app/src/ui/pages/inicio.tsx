@@ -3,6 +3,7 @@ import Sidebar from '../components/sideBar'; // Asegúrate de importar el compon
 import Modal from 'react-modal';
 import { useUser } from '../../context/UserContext';
 import { useNoteContext, Note } from '../../context/NoteContext';
+import axios from 'axios';
 
 Modal.setAppElement('#root'); // Set the root element for accessibility
 
@@ -30,6 +31,7 @@ const Inicio: React.FC = () => {
         contenido: content,
         id_usuario: user?.id!,
         estado: 'Pendiente',
+        fecha: new Date().toISOString().split('T')[0], 
       };
 
       if (!noteData.nombre) {
@@ -97,8 +99,10 @@ const Inicio: React.FC = () => {
 
   const handleCompleteNotes = async (noteIds: number[]) => {
     try {
-      const updatePromises = noteIds.map(id => updateNote(id, { estado: 'Completada' }));
-      await Promise.all(updatePromises);
+      const token = localStorage.getItem('token');
+      await axios.put('http://localhost:3000/api/notes/multiple', { noteIds, estado: 'Completada' }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setModalMessage('Notas completadas exitosamente');
       setModalColor('text-green-600');
       setIsModalOpen(true);
@@ -109,6 +113,7 @@ const Inicio: React.FC = () => {
       setIsModalOpen(true);
     }
   };
+
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -149,7 +154,7 @@ const Inicio: React.FC = () => {
                 {editingNote && (
                   <button
                     onClick={() => handleDeleteNote(editingNote.id_nota!)}
-                    className="block w-full bg-red-600 hover:bg-red-500 text-white p-2 rounded ml-2"
+                    className="block w-full bg-gray-700 hover:bg-gray-500 text-white p-2 rounded ml-2"
                   >
                     Eliminar Nota
                   </button>
