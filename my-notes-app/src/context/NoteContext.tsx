@@ -64,6 +64,7 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setNotes(updatedNotes); // Actualizar la nota en el estado local
     } catch (error) {
       console.error('Error al actualizar la nota:', error);
+      
     }
   };
 
