@@ -1,4 +1,4 @@
-import React, { useState,  } from 'react';
+import React, { useState } from 'react';
 import Sidebar from '../components/sideBar'; // Asegúrate de importar el componente Sidebar correctamente
 import Modal from 'react-modal';
 import { useUser } from '../../context/UserContext';
@@ -17,8 +17,6 @@ const Inicio: React.FC = () => {
   const [modalColor, setModalColor] = useState<string>('text-green-600'); // Default color for success message
   const { user } = useUser(); // Obtener el usuario del contexto
   const { addNote, updateNote, deleteNote, updateMultipleNotes, deleteMultipleNotes } = useNoteContext(); // Obtener las funciones del contexto de notas
-
-  
 
   const handleSaveNote = async () => {
     try {
@@ -45,9 +43,11 @@ const Inicio: React.FC = () => {
 
       if (editingNote) {
         await updateNote(editingNote.id_nota!, noteData);
+        setSelectedNote({ ...editingNote, ...noteData });
         setModalMessage('Nota actualizada exitosamente');
       } else {
-        await addNote(noteData);
+        const newNote = await addNote(noteData);
+        setSelectedNote(newNote);
         setModalMessage('Nota creada exitosamente');
       }
       setModalColor('text-green-600');
@@ -112,17 +112,16 @@ const Inicio: React.FC = () => {
     }
   };
 
-    const handleNewNote = () => {
-      setTitle('');
-      setContent('');
-      setEditingNote(null);
-      setSelectedNote(null);
-    };
+  const handleNewNote = () => {
+    setTitle('');
+    setContent('');
+    setEditingNote(null);
+    setSelectedNote(null);
+  };
 
   const closeModal = () => {
     setIsModalOpen(false);
   };
-
 
   return (
     <div className="flex flex-col lg:flex-row">
@@ -137,9 +136,9 @@ const Inicio: React.FC = () => {
           <div className="bg-white rounded-xl shadow-md p-4">
             <div className='flex justify-between items-center'>
               <Link to ='/'>
-              <button onClick={handleNewNote} className="mt-2 shadow appearance-none hover:text-yellow-300 focus:outline-none focus:shadow-outline hover:shadow-md text-start mb-6 bg-gray-700 text-white px-4 py-2 rounded">
-                Nueva nota
-              </button>
+                <button onClick={handleNewNote} className="mt-2 shadow appearance-none hover:text-yellow-300 focus:outline-none focus:shadow-outline hover:shadow-md text-start mb-6 bg-gray-700 text-white px-4 py-2 rounded">
+                  Nueva nota
+                </button>
               </Link>
               <h1 className="text-yellow-300 text-2xl text-center mb-6 w-4/6 sm:mr-16 xs:mr-2 mr-28">Crea o Edita tu Nota</h1>
               <div className='hidden md:block'/>

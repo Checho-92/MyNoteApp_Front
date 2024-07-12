@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import Modal from 'react-modal';
@@ -8,11 +8,22 @@ Modal.setAppElement('#root'); // Set the root element for accessibility
 const Login: React.FC = () => {
   const [nombre, setNombre] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [modalMessage, setModalMessage] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalColor, setModalColor] = useState<string>('text-green-600'); // Default color for success message
   const navigate = useNavigate();
   const { setUser } = useUser();
+
+  useEffect(() => {
+    const savedNombre = localStorage.getItem('nombre');
+    const savedPassword = localStorage.getItem('password');
+    if (savedNombre && savedPassword) {
+      setNombre(savedNombre);
+      setPassword(savedPassword);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +34,8 @@ const Login: React.FC = () => {
       setModalColor('text-red-500');
       setIsModalOpen(true);
       return;
-        } 
+    }
+
     try {
       const response = await fetch('http://localhost:3000/api/login', {
         method: 'POST',
@@ -42,6 +54,15 @@ const Login: React.FC = () => {
         setIsModalOpen(true);
 
         setUser(data.user);
+
+        if (rememberMe) {
+          localStorage.setItem('nombre', nombre);
+          localStorage.setItem('password', password);
+        } else {
+          localStorage.removeItem('nombre');
+          localStorage.removeItem('password');
+        }
+
         setTimeout(() => {
           navigate('/');
         }, 1000);
@@ -93,7 +114,13 @@ const Login: React.FC = () => {
 
             <div className="flex items-center justify-between mb-3">
               <label htmlFor="remember" className="flex items-center">
-                <input type="checkbox" id="remember" className="w-4 h-4 border-gray-300 focus:bg-indigo-600" />
+                <input
+                  type="checkbox"
+                  id="remember"
+                  className="w-4 h-4 border-gray-300 focus:bg-indigo-600"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
                 <span className="ml-2 text-gray-700">Recuérdame</span>
               </label>
             </div>

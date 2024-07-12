@@ -1,4 +1,3 @@
-// src/context/NoteContext.ts
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import axios from 'axios';
 
@@ -15,11 +14,11 @@ export interface Note {
 interface NoteContextType {
   notes: Note[];
   fetchNotes: (userId: number) => Promise<void>;
-  addNote: (note: Omit<Note, 'id_nota' | 'fecha'>) => Promise<void>;
+  addNote: (note: Omit<Note, 'id_nota' | 'fecha'>) => Promise<Note>;
   updateNote: (id: number, noteData: Partial<Note>) => Promise<void>;
   deleteNote: (id: number) => Promise<void>;
-  updateMultipleNotes: (noteIds: number[], estado: string) => Promise<void>; // Añadir la función para actualizar múltiples notas
-  deleteMultipleNotes: (noteIds: number[]) => Promise<void>; // Añadir la función para eliminar múltiples notas
+  updateMultipleNotes: (noteIds: number[], estado: string) => Promise<void>;
+  deleteMultipleNotes: (noteIds: number[]) => Promise<void>;
 }
 
 const NoteContext = createContext<NoteContextType | undefined>(undefined);
@@ -39,7 +38,7 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const addNote = async (note: Omit<Note, 'id_nota' | 'fecha'>) => {
+  const addNote = async (note: Omit<Note, 'id_nota' | 'fecha'>): Promise<Note> => {
     try {
       const token = localStorage.getItem('token');
       const newNote = {
@@ -51,8 +50,10 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         headers: { Authorization: `Bearer ${token}` },
       });
       setNotes([...notes, response.data]); // Agregar la nueva nota al estado local
+      return response.data;
     } catch (error) {
       console.error('Error al agregar la nota:', error);
+      throw error;
     }
   };
 
@@ -66,6 +67,7 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setNotes(updatedNotes); // Actualizar la nota en el estado local
     } catch (error) {
       console.error('Error al actualizar la nota:', error);
+      throw error;
     }
   };
 
@@ -79,35 +81,38 @@ export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setNotes(updatedNotes); // Eliminar la nota del estado local
     } catch (error) {
       console.error('Error al eliminar la nota:', error);
+      throw error;
     }
   };
 
   const updateMultipleNotes = async (noteIds: number[], estado: string) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put('http://localhost:3000/api/multiple', { noteIds, estado }, {
+      await axios.put(`http://localhost:3000/api/multiple`, { noteIds, estado }, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const updatedNotes = notes.map(note =>
+      const updatedNotes = notes.map(note => (
         noteIds.includes(note.id_nota!) ? { ...note, estado } : note
-      );
-      setNotes(updatedNotes); // Actualizar el estado de las notas en el estado local
+      ));
+      setNotes(updatedNotes); // Actualizar el estado de múltiples notas en el estado local
     } catch (error) {
       console.error('Error al actualizar las notas:', error);
+      throw error;
     }
   };
 
   const deleteMultipleNotes = async (noteIds: number[]) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.delete('http://localhost:3000/api/multiple', {
+      await axios.delete(`http://localhost:3000/api/multiple`, {
         headers: { Authorization: `Bearer ${token}` },
         data: { noteIds },
       });
       const updatedNotes = notes.filter(note => !noteIds.includes(note.id_nota!));
-      setNotes(updatedNotes); // Eliminar las notas del estado local
+      setNotes(updatedNotes); // Eliminar múltiples notas del estado local
     } catch (error) {
       console.error('Error al eliminar las notas:', error);
+      throw error;
     }
   };
 
